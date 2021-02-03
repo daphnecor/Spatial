@@ -5,7 +5,7 @@ https://github.com/mattperich/TrialData/tree/master/Tools
 import numpy as np
 
 
-def remove_bad_trials(trial_data, ranges, remove_nan_idx=False, nan_idx_names, verbose=False):
+def remove_bad_trials(trial_data, ranges, nan_idx_names, remove_nan_idx=False, verbose=False):
     """"
     1) Will remove any trials with any idx_ fields that are NaN
     2) Will remove trials according to ranges input
@@ -33,7 +33,6 @@ def remove_bad_trials(trial_data, ranges, remove_nan_idx=False, nan_idx_names, v
 
     bad_units: the dataframe containing said bad trials
     """
-
 
     use_trials = np.arange(0, len(trial_data))
     
@@ -68,30 +67,30 @@ def remove_bad_trials(trial_data, ranges, remove_nan_idx=False, nan_idx_names, v
                 elif ranges[i, 1] == 'end': # TODO
 
 
-                # if the requested values don't exist 
-                if len(idx1) == 0:
-                    # TODO
-                    assert('idx references are outside trial range.')
-                elif len(idx2) == 0:
-                    # TODO
-                    assert('idx references are outside trial range.')
+                    # if the requested values don't exist 
+                    if len(idx1) == 0:
+                        # TODO
+                        assert('idx references are outside trial range.')
+                    elif len(idx2) == 0:
+                        # TODO
+                        assert('idx references are outside trial range.')
 
-                    # ASK: goal of this, can this be done more efficiently?    
-                    # ... More sanity checks 
+                        # ASK: goal of this, can this be done more efficiently?    
+                        # ... More sanity checks follow
 
     # IF index is bad --> 1
     bad_idx[:, trial] = 1
 
-if verbose:
-    print(f'Removed {sum(bad_idx)} trials')
+    if verbose:
+        print(f'Removed {sum(bad_idx)} trials')
 
-bad_trials = trial_data[np.where(bad_idx==1)]
-trial_data = trial_data[np.where(bad_idx==0)]
+    bad_trials = trial_data[np.where(bad_idx==1)]
+    trial_data = trial_data[np.where(bad_idx==0)]
 
-return bad_trials, trial_data
+    return bad_trials, trial_data
 
 
-def remove_bad_neurons(trial_data, ranges, remove_nan_idx=False, nan_idx_names, do_shunt_check=False, prctile_cutoff=99.5, do_fr_check=True,
+def remove_bad_neurons(trial_data, do_shunt_check=False, prctile_cutoff=99.5, do_fr_check=True,
                       min_fr=0, fr_window=[], calc_fr=False, verbose=False):
     """"
     Checks for shunts or duplicate neurons based on coincidence, and also removes low-firing cells.
@@ -102,37 +101,54 @@ def remove_bad_neurons(trial_data, ranges, remove_nan_idx=False, nan_idx_names, 
     trial_data: pd.DataFrame
         data in trial_data format
 
-    ranges: dict
-        {'idx_START','idx_END',[MIN_#BINS,MAX_#BINS]...} 
-        ex: {'idx_go_cue','idx_movement_on',[5 30]} to remove
-          reaction times smaller than 5 and larger than 30 bins
     remove_nan_idx: bool (optional, default False)
         removes trials any idx with NaN values.
+
     nan_idx_names: str of list of str
         which fields for remove_nan_idx. Default is to do 'all'
+
     do_shunt_check: bool (optional, default False)
-        ...
-    prctile_cutoff: float
-        cutoff threshold in percentage
+        flag to look for coincident spiking
+
+    prctile_cutoff: int
+        value (0-100) for empirical test distribution
+
     do_fr_check: bool (optional, default True)
-        ...
+        flag to look for minimum firing rate
+
     min_fr: float
-        ...
-    fr_window: ...
-        ...
-    calc_window: bool (optional, default False)
-        ...
+        minimum firing rate value to be a good cell 
+        NOTE: assumes it's already a firing rate, i.e., it won't divide by bin size
+
+    fr_window: ... #TODO
+         when during trials to evaluate firing rate {'idx_BEGIN',BINS_AFTER;'idx_END',BINS_AFTER}
+    
+    calc_fr: bool (optional, default False)
+        will divide by bin_size if true
+    
     use_trials: np.array
-        ...
+        can only use a subset of trials if desired
     
     Returns
     -------
     trial_data: the dataframe with bad units removed
     
-    bad_units: list of indices in the original dataframe thata are bad
+    bad_units: list of indices in the original dataframe that are bad
     """
 
+    # ASK: check_td_quality(trial_data) 
 
+    # determine bin size, all are the same so we can take any trial
+    bin_size = trial_data.iloc[0, :]['bin_size']
+
+    # select subset of the data if preferred, otherwise use all data
+    #if len(use_trials) != len()
+        #use_trials = getTDidx(trial_data, col, v); # Existing function in Pyaldata
+
+    # TODO ...
+
+    # ASK: there is a function in Pyaldata called 'remove_low_firing_neurons' but this 
+    # does not check for shunts based on coincidence.
 
 
 
@@ -161,10 +177,18 @@ def getTDfields(trial_data, type): # TODO: build this function
     -------
     fn: ...
         the fieldnames of which_type
-
     """
 
     pass
+
+
+def sqrtTransform():
+    """
+    Already exists
+    """
+    pass
+
+
 
 
 
