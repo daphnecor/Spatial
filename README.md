@@ -1,4 +1,10 @@
-## Workflow
+# Folders
+
+- 📦  `pyaldata` contains the existing code base (created by ...)
+- 📊  `explore.ipyb` is used to plot figures
+- 🔧 `tools.py` are the functions used to plot figures, preprocess data etc. based on the [existing matlab repo Trialdata](https://github.com/mattperich/TrialData)
+
+# General workflow
 
 ### Part 0 - Data structure
 
