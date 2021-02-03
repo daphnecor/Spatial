@@ -1,5 +1,3 @@
-# Manifold
-
 ## Workflow
 
 ### Part 0 - Data structure
