@@ -5,11 +5,97 @@ https://github.com/mattperich/TrialData/tree/master/Tools
 import numpy as np
 
 
+def remove_bad_trials(trial_data, ranges, remove_nan_idx=False, nan_idx_names, verbose=False):
+    """"
+    1) Will remove any trials with any idx_ fields that are NaN
+    2) Will remove trials according to ranges input
+
+    LINK: https://github.com/mattperich/TrialData/blob/master/Tools/removeBadTrials.m
+
+    Parameters
+    ----------
+    trial_data: pd.DataFrame
+        data in trial_data format
+
+    ranges: dict
+        {'idx_START','idx_END',[MIN_#BINS,MAX_#BINS]...}: {'idx_go_cue','idx_movement_on',[5 30]} 
+        to remove reaction times smaller than 5 and larger than 30 bins
+
+    remove_nan_idx: bool (optional, default False)
+        removes trials any idx with NaN values.
+
+    nan_idx_names: str or list of str
+        which fields for remove_nan_idx. Default is to do 'all'
+    
+    Returns
+    -------
+    trial_data: the dataframe with bad trials removed
+
+    bad_units: the dataframe containing said bad trials
+    """
+
+
+    use_trials = np.arange(0, len(trial_data))
+    
+    # TODO: ln 39-40 
+    # trial_data = check_td_quality(trial_data);
+    # if ~iscell(nan_idx_names), nan_idx_names = {nan_idx_names}; end
+
+    fn_time = getTDfields(trial_data, type='time');
+
+    # TODO: ln 44-47
+
+    # construct empty array. If idx is bad: 1, if idx is ok: 0.
+    bad_idx = np.zeros([1, len(trial_data)])
+
+    # iterate through trials (rows wise) in one session
+    for idx, td in trial_data.iterrows():
+
+        if remove_nan_idx: # loop along all indices and make sure they aren't NaN (remove NaNs)
+            td = td.dropna() # TODO: dropna specifics (ln 63)
+        
+        # TODO: isfield() ln 68-81
+        
+        # Look for trials that are outside the allowable length
+        if len(ranges) != 0: # if ranges is not empty
+            if ranges.shape[1] != 3: assert('Ranges input not properly formatted.')
+
+            for i in range(ranges.shape[0]):
+                # define index values so I can check to make sure it's okay
+
+                # TODO: deal([]) ln 89
+                if ranges[i, 0] == 'start': idx1 = 0
+                elif ranges[i, 1] == 'end': # TODO
+
+
+                # if the requested values don't exist 
+                if len(idx1) == 0:
+                    # TODO
+                    assert('idx references are outside trial range.')
+                elif len(idx2) == 0:
+                    # TODO
+                    assert('idx references are outside trial range.')
+
+                    # ASK: goal of this, can this be done more efficiently?    
+                    # ... More sanity checks 
+
+    # IF index is bad --> 1
+    bad_idx[:, trial] = 1
+
+if verbose:
+    print(f'Removed {sum(bad_idx)} trials')
+
+bad_trials = trial_data[np.where(bad_idx==1)]
+trial_data = trial_data[np.where(bad_idx==0)]
+
+return bad_trials, trial_data
+
+
 def remove_bad_neurons(trial_data, ranges, remove_nan_idx=False, nan_idx_names, do_shunt_check=False, prctile_cutoff=99.5, do_fr_check=True,
                       min_fr=0, fr_window=[], calc_fr=False, verbose=False):
     """"
     Checks for shunts or duplicate neurons based on coincidence, and also removes low-firing cells.
-    LINK: https://github.com/mattperich/TrialData/blob/master/Tools/removeBadTrials.m
+    LINK: https://github.com/mattperich/TrialData/blob/master/Tools/removeBadNeurons.m
 
     Parameters
     ----------
@@ -47,36 +133,7 @@ def remove_bad_neurons(trial_data, ranges, remove_nan_idx=False, nan_idx_names, 
     """
 
 
-    use_trials = np.arange(0, len(trial_data))
-    
-    # TODO: ln 39-40 
-    # trial_data = check_td_quality(trial_data);
-    # if ~iscell(nan_idx_names), nan_idx_names = {nan_idx_names}; end
 
-    fn_time = getTDfields(trial_data, type='time');
-
-    # TODO: ln 44-47
-
-    bad_idx = False(1, len(trial_data))
-
-    # iterate through trials (rows wise) in one session
-    for idx, td in trial_data.iterrows():
-
-        # loop along all indices and make sure they aren't NaN (remove NaNs)
-        td = td.dropna() # TODO: dropna specifics
-        
-        # 
-
-
-
-        
-
-
-
-
-        
-
-    pass
 
 
 def getTDfields(trial_data, type): # TODO: build this function
