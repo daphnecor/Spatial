@@ -32,3 +32,8 @@
 - same electrode
 - same array
 - other array
+
+
+## Mapping
+
+![](https://raw.githubusercontent.com/daphnecor/Pyaldata/master/Overview.jpg)
