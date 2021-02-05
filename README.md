@@ -31,8 +31,3 @@
 
 
 ### Part 3 - Find things out
-
-
-## Mapping [TODO]
-
-![](https://raw.githubusercontent.com/daphnecor/Pyaldata_temp/master/Overview.jpg)
