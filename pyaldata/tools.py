@@ -997,7 +997,7 @@ def get_average_firing_rates(trial_data, signal, divide_by_bin_size=None):
 
 
 @utils.copy_td
-def remove_low_firing_neurons(trial_data, signal, threshold, divide_by_bin_size=None):
+def remove_low_firing_neurons(trial_data, signal, threshold, divide_by_bin_size=None, verbose=False):
     """
     Remove neurons from signal whose average firing rate
     across all trials is lower than a threshold
@@ -1014,6 +1014,8 @@ def remove_low_firing_neurons(trial_data, signal, threshold, divide_by_bin_size=
         threshold in Hz
     divide_by_bin_size : bool, optional
         whether to divide by the bin size when calculating the firing rates
+    verbose : bool, optional, default False
+        print a message about how many neurons were removed
 
     Returns
     -------
@@ -1037,6 +1039,8 @@ def remove_low_firing_neurons(trial_data, signal, threshold, divide_by_bin_size=
 
     trial_data[unit_guide] = [arr[mask, :] for arr in trial_data[unit_guide]]
 
+    if verbose:
+        print(f"Removed {np.sum(~mask)} neurons from {signal}.")
 
     return trial_data
 
@@ -1087,4 +1091,4 @@ def select_trials(trial_data, query, reset_index=True):
     if reset_index:
         return trial_data.loc[trials_to_keep, :].reset_index(drop=True)
     else:
-        return trial_data.loc[trial_to_keep, :]
+        return trial_data.loc[trials_to_keep, :]
