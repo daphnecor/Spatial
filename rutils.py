@@ -187,9 +187,10 @@ def elecs_to_neurons(elec_map, unit_guide, elecs=list(range(1, 97)), N=10):
     return cell_distrib, cells_on_arr
 
 
-def elecs_to_spikes():
+def elecs_to_spikes(elec_map, unit_guide, elecs=list(range(1, 97)), N=10):
     """
-    Get mapping between electrode numbers and spike indices in df for all trials
+    Get mapping between electrode numbers and spike indices in df for all trials.
+    The indices for one trial gives the indices for all trials, because the unit guides are all equal.
 
     Parameters  
     ----------
@@ -200,6 +201,8 @@ def elecs_to_spikes():
 
     Returns
     -------
+
+    
 
     """
 
