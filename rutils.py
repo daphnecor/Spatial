@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy.spatial import distance
+from sklearn import decomposition
 cmap = sns.diverging_palette(250, 30, l=65, center="dark", as_cmap=True)
 
 
@@ -187,25 +189,76 @@ def elecs_to_neurons(elec_map, unit_guide, elecs=list(range(1, 97)), N=10):
     return cell_distrib, cells_on_arr
 
 
-def elecs_to_spikes(elec_map, unit_guide, elecs=list(range(1, 97)), N=10):
+
+def getPCA(rates):
     """
-    Get mapping between electrode numbers and spike indices in df for all trials.
-    The indices for one trial gives the indices for all trials, because the unit guides are all equal.
-
-    Parameters  
+    Performs PCA on firing rates
+    
+    Parameters
     ----------
-    elec_map: the NxN array with electrode numbers as elements.
-
-    unit_guide:
-
-
+    
     Returns
     -------
+    loadings: the eigenvectors
+        Each element represents a loading, namely how much (the weight) each 
+        original neuron contributes to the corresponding principal component
+    """ 
+    X = np.concatenate(rates.values, axis=0)
+    pca = decomposition.PCA()
+    X = pca.fit_transform(X)
 
-    
+    return pca.components_
 
+
+def compare_pc_weights(main_arr, main_ug, w, other_ug=None):
     """
+    Compares the PC weights across distance
+    
+    main_arr: 
+       electrode map containing the spatial location of the electrodes on the main array
+    
+    other_arr: 
+    
+    main_ug:
+        unit guide 
+    
+    other_ug:
+    
+    w: np.array 
+        vector with the weights or loadings of the first principal component
+    """
+    
+    # compare within main arr
+    
+    within_arr_dist, within_arr_w = [], [] 
 
+    for i in range(len(main_ug[:, 0])): # loop along neurons 
+        # find electrode that corresponds to this neuron
+        elec1 = main_ug[i, 0]
+        loc1 = np.where(main_arr == elec1) # find neuron location on array 
+
+        for j in range(i+1, len(main_ug[:, 0])): # compare to all other electrodes (j!=i)        
+            # find electrode location of this neuron within same array
+            elec2 = main_ug[j, 0]
+            loc2 = np.where(main_arr == elec2)
+
+            # find euclidean distance between two neurons on array
+            dst = distance.euclidean(loc1, loc2)
+
+            within_arr_dist.append(dst) 
+            within_arr_w.append(np.abs(w[j] - w[i])) 
+    
+    
+    # compare between arrays (main & other)
+    between_arrs_w = []
+    
+    for i in range(len(main_ug[:, 0])): # loop along neurons in main unit guide
+        # compare to all neurons in other array
+        for j in range(len(other_ug[:, 0])):
+            # compare all weights from main to all weights from pmd
+            between_arrs_w.append(np.abs(w[main_ug.shape[0]+j] - w[i]))
+    
+    return np.array(within_arr_dist), np.array(within_arr_w), np.array(between_arrs_w)
 
 
 
