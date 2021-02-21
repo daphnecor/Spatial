@@ -279,7 +279,53 @@ def display_grid(arr):
 
 
 
+# def get_neuron_elec_mapping(elec_map, unit_guide, spikes, trial):
+#     '''
+    
+#     Parameters
+#     ----------
+#     elec_map:
+    
+#     unit_guide: 
+    
+#     Returns
+#     -------
+#     unit_arr: 
 
+#     '''
+#     elecs = list(range(1, 97)) # total number of electrodes
+#     unit_arr = np.zeros((10, 10)) # assuming 10x10 array
+#     neuron_distrib = []
+#     elecs_to_spikes = {}
+    
+#     # get the spike trains from a particular trial
+#     spikes_trial_i = spikes[trial]
+
+#     for e in elecs:
+
+#         # find indices in unit guide of this electrode number 
+#         e_indices = np.where(unit_guide[:, 0] == e)
+
+#         if np.size(e_indices) == 0: # skip if electrode number is not in col
+#             neuron_distrib.append(0)
+#             elecs_to_spikes.update({e: np.array([])}) # add empty array?
+#             continue
+
+#         # take neurons that belong to these indices 
+#         neurons_at_e = max(unit_guide[:, 1][e_indices])
+
+#         neuron_distrib.append(neurons_at_e) # largest number is total number of neurons
+
+#         arr_idx = np.where(elec_map == e) # get spatial location of electrode
+#         unit_arr[arr_idx] = neurons_at_e # store number of neurons in array
+
+#         # spiketrains of neurons that belong to electrode e
+#         spikes_elec_k = np.array([spikes_trial_i[:, k] for k in e_indices])[0]
+
+#         # append to dictionary with electrode num as key and spiketrains as values
+#         elecs_to_spikes.update({e:spikes_elec_k})
+        
+#     return neuron_distrib, unit_arr, elecs_to_spikes
 
 
 
