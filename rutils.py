@@ -210,55 +210,76 @@ def getPCA(rates):
     return pca.components_
 
 
-def compare_pc_weights(main_arr, main_ug, w, other_ug=None):
+def compare_pc_weights(m1_arr, m1_ug, pmd_arr, pmd_ug, w):
     """
     Compares the PC weights across distance
     
-    main_arr: 
-       electrode map containing the spatial location of the electrodes on the main array
+    m1_arr: np.array
+       electrode map containing the spatial location of the m1 electrodes 
     
-    other_arr: 
+    m1_ug: 
+        unit guide of the m1 array
     
-    main_ug:
-        unit guide 
-    
-    other_ug:
+    pmd_arr: np.array
+        electrode map containing the spatial location of the m1 electrodes
+
+    pmd_ug: 
+        unit guide of the pmd array
     
     w: np.array 
-        vector with the weights or loadings of the first principal component
+        vector with the weights or loadings of the first principal component (all neurons)
     """
-    
-    # compare within main arr
-    
-    within_arr_dist, within_arr_w = [], [] 
+    # we know that the weight vector is constructed such that all M1 weights are first, and all PMd weights are after
+    # [M1, M1, ... , PMd , PMd]
 
-    for i in range(len(main_ug[:, 0])): # loop along neurons 
+    # compare within m1 array
+    within_m1_dist, within_m1_w = [], [] 
+
+    for i in range(len(m1_ug[:, 0])): # loop along neurons 
         # find electrode that corresponds to this neuron
-        elec1 = main_ug[i, 0]
-        loc1 = np.where(main_arr == elec1) # find neuron location on array 
+        elec1 = m1_ug[i, 0]
+        loc1 = np.where(m1_arr == elec1) # find neuron location on array 
 
-        for j in range(i+1, len(main_ug[:, 0])): # compare to all other electrodes (j!=i)        
+        for j in range(i+1, len(m1_ug[:, 0])): # compare to all other electrodes (j!=i)        
             # find electrode location of this neuron within same array
-            elec2 = main_ug[j, 0]
-            loc2 = np.where(main_arr == elec2)
+            elec2 = m1_ug[j, 0]
+            loc2 = np.where(m1_arr == elec2)
 
             # find euclidean distance between two neurons on array
             dst = distance.euclidean(loc1, loc2)
 
-            within_arr_dist.append(dst) 
-            within_arr_w.append(np.abs(w[j] - w[i])) 
+            within_m1_dist.append(dst) 
+            within_m1_w.append(np.abs(w[j] - w[i])) 
+
+    # compare within pmd array
+    within_pmd_dist, within_pmd_w = [], [] 
+
+    for i in range(len(pmd_ug[:, 0])): # loop along neurons 
+        # find electrode that corresponds to this neuron
+        elec1 = pmd_ug[i, 0]
+        loc1 = np.where(pmd_arr == elec1) # find neuron location on array 
+
+        for j in range(i+1, len(pmd_ug[:, 0])): # compare to all other electrodes (j!=i)        
+            # find electrode location of this neuron within same array
+            elec2 = pmd_ug[j, 0]
+            loc2 = np.where(pmd_arr == elec2)
+
+            # find euclidean distance between two neurons on array
+            dst = distance.euclidean(loc1, loc2)
+
+            within_pmd_dist.append(dst) 
+            within_pmd_w.append(np.abs(w[j] - w[i])) 
     
+    # compare pmd to m1
+    pmd_m1_w = []
     
-    # compare between arrays (main & other)
-    between_arrs_w = []
-    
-    for i in range(len(main_ug[:, 0])): # loop along neurons in main unit guide
+    for i in range(len(pmd_ug[:, 0])): # loop along neurons 
         # compare to all neurons in other array
-        for j in range(len(other_ug[:, 0])):
-            # compare all weights from main to all weights from pmd
-            between_arrs_w.append(np.abs(w[main_ug.shape[0]+j] - w[i]))
+        for j in range(len(m1_ug[:, 0])):
+            # compare all weights from main to all weights from other
+            pmd_m1_w.append(np.abs(w[pmd_ug.shape[0]+j] - w[i]))
     
-    return np.array(within_arr_dist), np.array(within_arr_w), np.array(between_arrs_w)
+    return within_m1_dist, within_m1_w, within_pmd_dist, within_pmd_w, pmd_m1_w 
 
 
 
