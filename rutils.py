@@ -189,31 +189,33 @@ def elecs_to_neurons(elec_map, unit_guide, elecs=list(range(1, 97)), N=10):
     return cell_distrib, cells_on_arr
 
 
-
 def getPCA(rates):
     """
     Performs PCA on firing rates
     
     Parameters
     ----------
-    
+    rates:
+        
     Returns
     -------
     loadings: the eigenvectors
         Each element represents a loading, namely how much (the weight) each 
         original neuron contributes to the corresponding principal component
+    explained_var: ratio of explained variance
     """ 
     X = np.concatenate(rates.values, axis=0)
     pca = decomposition.PCA()
     X = pca.fit_transform(X)
 
-    return pca.components_
-
+    return pca.components_, pca.explained_variance_ratio_
 
 def compare_pc_weights(m1_arr, m1_ug, pmd_arr, pmd_ug, w):
     """
     Compares the PC weights across distance
     
+    Parameters
+    ----------
     m1_arr: np.array
        electrode map containing the spatial location of the m1 electrodes 
     
@@ -228,6 +230,10 @@ def compare_pc_weights(m1_arr, m1_ug, pmd_arr, pmd_ug, w):
     
     w: np.array 
         vector with the weights or loadings of the first principal component (all neurons)
+    
+    Returns
+    -------
+    
     """
     # we know that the weight vector is constructed such that all M1 weights are first, and all PMd weights are after
     # [M1, M1, ... , PMd , PMd]
@@ -291,11 +297,6 @@ def display_grid(arr):
     for i in range(len(arr)):
         for j in range(len(arr)):
             text = ax.text(j, i, int(arr[i, j]), ha='center', va='center', color='w')
-
-
-
-
-
 
 
 
