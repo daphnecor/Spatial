@@ -311,7 +311,7 @@ def display_grid(arr):
 
 
 
-def sort_pcs_by(pcs, by, abs_val=True):
+def sort_pcs_by(pcs, m1_spikes, by, abs_val=True):
     '''
     Sort the principal components loadings by the indices of the dimension 'by' in descending order.
     
@@ -332,53 +332,14 @@ def sort_pcs_by(pcs, by, abs_val=True):
         pcs = pcs
     
     # get the weights of the first n neurons --> M1 & PMd neurons
-    pcs_m1  = pcs[0:td['M1_spikes'][0].shape[1], :]
-    pcs_pmd = pcs[td['M1_spikes'][0].shape[1]:, :]
+    pcs_m1  = pcs[0:m1_spikes.shape[1], :]
+    pcs_pmd = pcs[m1_spikes.shape[1]:, :]
 
-    # sort 
-    W_m = pcs_m1[np.argsort(-pcs_m1[:, by]), :]
-    W_p = pcs_pmd[np.argsort(-pcs_pmd[:, by]), :]
+    # sort in descending order
+    W_m = pcs_m1[np.argsort(pcs_m1[:, by])[::-1], :]
+    W_p = pcs_pmd[np.argsort(pcs_pmd[:, by])[::-1], :]
 
     return np.concatenate((W_m, np.full((1, W_m.shape[1]), np.nan), W_p), axis=0)
-
-
-
-class SparsePCA():
-	"""
-	Sparse principal component analysis
-	"""
-
-	def __init__(lam, tol=1e-8, max_iter=100, verbose=False):
-		self.lam = lam
-		self.tol = tol
-		self.max_iter = max_iter
-		self.verbose = verbose
-
-	def fit(self, X):
-		"""Fit the model from data in X
-
-		Parameters
-		----------
-		
-
-		Returns
-		-------
-
-		"""
-		
-		# demean data
-		self.mean_ = X.mean(axis=0)
-		X = X - self.mean_
-
-	def learn():
-		"""
-		"""
-		pass
-
-
-
-
-
 
 
 
