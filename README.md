@@ -1,4 +1,4 @@
-# Folders & Code 
+# This repository 
 
 - 📦  `pyaldata` contains the utils and tools from the [PyalData repo](https://github.com/mattperich/PyalData) 
 - 📊  `Main.ipyb` is used to plot figures and generate results
