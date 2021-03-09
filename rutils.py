@@ -296,6 +296,7 @@ def compare_pc_weights(m1_arr, m1_ug, pmd_arr, pmd_ug, w):
 	df['array'].iloc[:len(within_m1_w)] = 'M1'
 	df['array'].iloc[len(within_m1_w): len(within_m1_w) + len(within_pmd_w)] = 'PMd'
 	df['group'] = df['distance'].apply(lambda d: 'same elec' if d == 0 else ('same array' if d > 0 else ('other array')))
+	df['within arr distance'] = pd.cut(df['distance'], bins=[0, 0.001, 3, 6, 9, 16], labels=['0', '0 - 3','3 - 6','6 - 9', '> 9'])
 
 	return df
 	
