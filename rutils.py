@@ -235,7 +235,7 @@ def compare_pc_weights(m1_arr, m1_ug, pmd_arr, pmd_ug, w):
 	Returns
 	-------
 	df: pandas dataframe 
-		...
+		dataframe that can be used to plot distributions directly with seaborn by group
 
 	Note that this assumes that the weight vector is constructed such that all M1 weights are first, 
 	and all PMd weights are second like [M1, M1, ... , PMd , PMd]
