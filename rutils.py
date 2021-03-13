@@ -311,8 +311,61 @@ def display_grid(arr):
 			text = ax.text(j, i, int(arr[i, j]), ha='center', va='center', color='w')
 
 
+def compare_self_global_mani(m1_pcs, pmd_pcs, m1pmd_pcs, end_M1, pc_dim):
+    ''' 
+    Compare self to global manifold 
+    
+    Parameters
+    ----------
+    m1_pcs: np.array
+        PCA done on m1 neural firing rates alone
+    pmd_pcs: np.array
+        PCA done on pmd neural firing rates alone
+    both_pcs:
+        PCA done on all neural firing rates
+    pc_dim: int
+        Principal Component vector to use
+    end_M1: int
+    	number of neurons that belong to M1 arr
+        
+    Return
+    ------
+    Scatterplot & regplot with correlation coefficient r
+    '''
 
-def sort_pcs_by(pcs, m1_spikes, by, abs_val=True):
+    self_pmd = np.array([pmd_pcs[:, pc_dim]])
+    glob_pmd = np.array([m1pmd_pcs[end_M1:, pc_dim]])
+    self_glob_pmd = np.vstack((self_pmd, glob_pmd)).T
+
+    self_m1 = np.array([m1_pcs[:, pc_dim]])
+    glob_m1 = np.array([m1pmd_pcs[0:end_M1, pc_dim]])
+    self_glob_m1 = np.vstack((self_m1, glob_m1)).T
+    
+    self_glob_mani = np.vstack((self_glob_pmd, self_glob_m1))
+    r = np.corrcoef(self_glob_mani[:, 0], self_glob_mani[:, 1])[0,1]
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+    fig.suptitle(f'Comparison self vs global manifold for PC {pc_dim+1}')
+
+    ax1.set_title(f'r = {round(r,4)}')
+    ax1.plot(self_glob_pmd[:, 0], self_glob_pmd[:, 1], 'o', label='PMd')
+    ax1.plot(self_glob_m1[:, 0], self_glob_m1[:, 1], 'o', label='M1')
+    ax1.plot([-0.5, 0.5], [-0.5, 0.5], '--k', label=r'$r=1$')
+    ax1.set_xlabel('Weight on self-manifold')
+    ax1.set_ylabel('Weight on global-manifold')
+    ax1.set_xticks(np.arange(-0.5, 0.6, 0.1))
+    ax1.set_yticks(np.arange(-0.5, 0.6, 0.1))
+    ax1.legend()
+
+    sns.regplot(self_glob_mani[:, 0], self_glob_mani[:, 1], ax=ax2, label=r'true $r$')
+    ax2.set_xticks(np.arange(-0.5, 0.6, 0.1))
+    ax2.set_yticks(np.arange(-0.5, 0.6, 0.1))
+    ax2.set_xlabel('Weight on self-manifold')
+    ax2.legend()
+    sns.despine()
+
+
+def sort_pcs(PCs, end_M1, dim, abs_val=True):
     '''
     Sort the principal components loadings by the indices of the dimension 'by' in descending order.
     
@@ -320,91 +373,29 @@ def sort_pcs_by(pcs, m1_spikes, by, abs_val=True):
     ----------
     pcs: np.array
         N x N matrix with the principal components
-    by: number of the pc by which you want to sort the others
+    dim: number of the pc by which you want to sort the others
     
     Returns
     -------
     M: np.array
     '''
-
-    if abs_val:
-        pcs = abs(pcs)
-    else:
-        pcs = pcs
+  
+    m1_pcs = PCs[0:end_M1, :]
+    pmd_pcs = PCs[end_M1:, :]
     
-    # get the weights of the first n neurons --> M1 & PMd neurons
-    pcs_m1  = pcs[0:m1_spikes.shape[1], :]
-    pcs_pmd = pcs[m1_spikes.shape[1]:, :]
-
+    # take the k th pc (the one by which you want to sort)
+    m1_k_pc = abs(m1_pcs[:, dim])
+    pmd_k_pc = abs(pmd_pcs[:, dim])
+    
+    # get indices that get this pc in descending order
+    desc_order_idx_m1 = np.argsort(m1_k_pc)[::-1]
+    desc_order_idx_pmd = np.argsort(pmd_k_pc)[::-1]
+    
     # sort in descending order
-    W_m = pcs_m1[np.argsort(pcs_m1[:, by])[::-1], :]
-    W_p = pcs_pmd[np.argsort(pcs_pmd[:, by])[::-1], :]
+    m1_pcs_ordered = m1_pcs[desc_order_idx_m1]
+    pmd_pcs_ordered = pmd_pcs[desc_order_idx_pmd]
 
-    return np.concatenate((W_m, np.full((1, W_m.shape[1]), np.nan), W_p), axis=0)
-
-
-
-# def get_neuron_elec_mapping(elec_map, unit_guide, spikes, trial):
-#     '''
-	
-#     Parameters
-#     ----------
-#     elec_map:
-	
-#     unit_guide: 
-	
-#     Returns
-#     -------
-#     unit_arr: 
-
-#     '''
-#     elecs = list(range(1, 97)) # total number of electrodes
-#     unit_arr = np.zeros((10, 10)) # assuming 10x10 array
-#     neuron_distrib = []
-#     elecs_to_spikes = {}
-	
-#     # get the spike trains from a particular trial
-#     spikes_trial_i = spikes[trial]
-
-#     for e in elecs:
-
-#         # find indices in unit guide of this electrode number 
-#         e_indices = np.where(unit_guide[:, 0] == e)
-
-#         if np.size(e_indices) == 0: # skip if electrode number is not in col
-#             neuron_distrib.append(0)
-#             elecs_to_spikes.update({e: np.array([])}) # add empty array?
-#             continue
-
-#         # take neurons that belong to these indices 
-#         neurons_at_e = max(unit_guide[:, 1][e_indices])
-
-#         neuron_distrib.append(neurons_at_e) # largest number is total number of neurons
-
-#         arr_idx = np.where(elec_map == e) # get spatial location of electrode
-#         unit_arr[arr_idx] = neurons_at_e # store number of neurons in array
-
-#         # spiketrains of neurons that belong to electrode e
-#         spikes_elec_k = np.array([spikes_trial_i[:, k] for k in e_indices])[0]
-
-#         # append to dictionary with electrode num as key and spiketrains as values
-#         elecs_to_spikes.update({e:spikes_elec_k})
-		
-#     return neuron_distrib, unit_arr, elecs_to_spikes
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return np.concatenate((m1_pcs_ordered, np.full((1, m1_pcs_ordered.shape[1]), np.nan), pmd_pcs_ordered), axis=0)
 
 
 
